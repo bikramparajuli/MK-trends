@@ -1,0 +1,38 @@
+import numpy as np
+import pandas as pd
+import pymannkendall as mk
+import matplotlib.pyplot as plt
+import pyhomogeneity as hg
+import statsmodels.api as sm
+
+# read precipitation data 
+data = pd.read_csv(r"C:\Users\bikra\Desktop\Thesis_Final\calculated spi\spi3\1-spi3.csv",parse_dates=['Date'],index_col='Date')
+data.head()
+data.plot(figsize=(12,8));
+fig, ax = plt.subplots(figsize=(12, 8))
+sm.graphics.tsa.plot_acf(data, lags=20, ax=ax);
+
+
+mko = mk.original_test(data, alpha=0.05)
+mkm = mk.pre_whitening_modification_test(data, alpha=0.05)
+pt = hg.pettitt_test(data, alpha=0.05)
+pt.cp
+mko
+mkm
+pt
+result = pt
+mn = data.index[0]
+mx = data.index[-1]
+loc = pd.to_datetime(result.cp)
+mu1 = result.avg.mu1
+mu2 = result.avg.mu2
+plt.figure(figsize=(16,6))
+plt.plot(data, label="Mean Precipitation")
+plt.hlines(mu1, xmin=mn, xmax=loc, linestyles='--', colors='orange',lw=1.5, label='mu1 : ' + str(round(mu1,2)))
+plt.hlines(mu2, xmin=loc, xmax=mx, linestyles='--', colors='g', lw=1.5, label='mu2 : ' + str(round(mu2,2)))
+plt.axvline(x=loc, linestyle='-.' , color='red', lw=1.5, label='Change point : '+ loc.strftime('%Y-%m-%d') + '\n p-value : ' + str(result.p))
+
+plt.title('Average annual precipitation above 2000 meters')
+plt.xlabel('Date')
+plt.ylabel('Precipitation')
+plt.legend(loc='upper right')
