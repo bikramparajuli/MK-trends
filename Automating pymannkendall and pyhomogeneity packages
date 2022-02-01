@@ -1,0 +1,31 @@
+import numpy as np
+import pandas as pd
+import pymannkendall as mk
+import matplotlib.pyplot as plt
+import pyhomogeneity as hg
+import statsmodels.api as sm
+import os 
+
+output = pd.DataFrame('', columns =['Station', 'mk.trend', 'mk.P', 'mk.Z', 'mk.slope','mmk.trend', 'mmk.P', 'mmk.Z', 'mmk.slope', 'pt.h', 'pt.cp' ], index = np.arange(1,50))
+# read precipitation data 
+i = 1
+for excelfile in os.listdir(r'C:\Users\bikra\Desktop\Thesis_Final\calculated spi\spi3'):
+    if excelfile[-4: ] == '.csv':
+        print(excelfile)
+        data = pd.read_csv(r'C:\Users\bikra\Desktop\Thesis_Final\calculated spi\spi3' + '\\' + excelfile, parse_dates=['Date'],index_col='Date')
+        mko = mk.original_test(data, alpha=0.05) 
+        mmk = mk.pre_whitening_modification_test(data, alpha=0.05) 
+        pt = hg.pettitt_test(data, alpha=0.05) 
+        output.loc[i]['Station'] = excelfile[0:] 
+        output.loc[i]['mk.trend'] = mko.trend 
+        output.loc[i]['mk.P'] = mko.p 
+        output.loc[i]['mk.Z'] = mko.z 
+        output.loc[i]['mk.slope'] = mko.slope 
+        output.loc[i]['mmk.trend'] = mmk.trend 
+        output.loc[i]['mmk.P'] = mmk.p 
+        output.loc[i]['mmk.Z'] = mmk.z 
+        output.loc[i]['mmk.slope'] = mmk.slope 
+        output.loc[i]['pt.h'] = pt.h 
+        output.loc[i]['pt.cp'] = pt.cp 
+        i = i+1
+output.to_csv(r'C:\Users\bikra\Desktop\Thesis_Final\calculated spi\spi3\spiTrends.csv')
